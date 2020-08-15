@@ -87,7 +87,7 @@ Do a RandomizedSearch first to see what might be a good hyper parameters to furt
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import RandomizedSearchCV
 
-'''
+explanation = '''
 n_estimators = number of trees in random forest
 max_features = number of features to consider at every split
 max_depth = maximum number of levels in tree
@@ -97,17 +97,17 @@ bootstrap = method of selecting samples for training each tree
 '''
 
 # Create the random grid
-random_grid = {'n_estimators': [int(x) for x in np.linspace(start = 200, stop = 2000, num = 10)], 
-               'max_features': ['auto', 'sqrt'], 
-               'max_depth': [None],  
-               'min_samples_split': [2, 5, 10],
+param_grid = {'n_estimators': [int(x) for x in np.linspace(start = 200, stop = 2000, num = 10)], 
+               'max_features': ['sqrt'], 
+               'max_depth': [10, 25, 50, 100, None],  
+               'min_samples_split': [2, 5, 8, 11],
                'min_samples_leaf': [1, 2, 4],
-               'bootstrap': [True, False]}
+               'bootstrap': [True]}
 
 
 # Random search across 100 different combinations of the parameters using 5 fold CV 5 and all available cores
 clf = RandomForestClassifier()
-random_search = RandomizedSearchCV(estimator=clf, param_distributions=random_grid, n_iter=100, cv=5, random_state=0, n_jobs = -1, scoring=None)
+random_search = RandomizedSearchCV(estimator=clf, param_distributions=param_grid, n_iter=200, cv=4, random_state=0, n_jobs=-1, scoring=None, verbose=2)
 random_search = random_search.fit(X_train, y_train)
 
 print(random_search.best_params_)
@@ -116,7 +116,6 @@ print(random_search.best_params_)
 with open('best_random_search_params.json', 'w') as fp:
     json.dump(random_search.best_params_, fp)
 ```
-
 
 Next, you could do a GridSearch based on the results of the RandomizedSearch. You could even do a GridSearch directly without doing a RandomizedSearch if the search space is not too large. If needed, save the results to a JSON for later reference.
 ```python
@@ -149,11 +148,10 @@ Evaluate how the model is performing for unseen data (test data and test labels)
 def evaluate(model, test_features, test_labels):
     predictions = model.predict(test_features)
     errors = abs(predictions - test_labels)
-    mape = 100 * np.mean(errors / test_labels)
-    accuracy = 100 - mape
+    accuracy =  (len(predictions) - sum(abs(predictions - test_labels))) / len(predictions)
     print('Model Performance')
     print('Average Error: {:0.4f} degrees.'.format(np.mean(errors)))
-    print('Accuracy = {:0.2f}%.'.format(accuracy))
+    print('Accuracy = {:0.2f}.'.format(accuracy))
     return accuracy
 
 
@@ -161,7 +159,7 @@ base_model = RandomForestClassifier()
 base_model.fit(X_train, y_train)
 base_accuracy = evaluate(base_model, X_test, y_test)
 
-best_random_search_model = rf_random.best_estimator_
+best_random_search_model = random_search.best_estimator_
 random_accuracy = evaluate(best_random_search_model, X_test, y_test)
 
 best_grid_search_model = grid_search.best_estimator_
@@ -171,8 +169,9 @@ grid_accuracy = evaluate(best_grid_search_model, X_test, y_test)
 
 Make final predictions using the best model. The CSV is saved as output when the 'Save & Run All' option is selected on Kaggle.
 ```python
-# make final predictions on test data
-predictions = best_grid_search_model.predict(X_final_test)
+# train best model on all the data and make final predictions on test data
+best_model = base_model.fit(X, y)
+predictions = best_model.predict(X_final_test)
 output = pd.DataFrame({'PassengerId': test_data.PassengerId, 'Survived': predictions})
 output.to_csv('my_submission.csv', index=False)
 ```
