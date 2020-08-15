@@ -107,7 +107,7 @@ param_grid = {'n_estimators': [int(x) for x in np.linspace(start = 200, stop = 2
 
 # Random search across 100 different combinations of the parameters using 5 fold CV 5 and all available cores
 clf = RandomForestClassifier()
-random_search = RandomizedSearchCV(estimator=clf, param_distributions=param_grid, n_iter=200, cv=4, random_state=0, n_jobs=-1, scoring=None, verbose=2)
+random_search = RandomizedSearchCV(estimator=clf, param_distributions=param_grid, n_iter=100, cv=4, random_state=0, n_jobs=-1, scoring=None, verbose=2)
 random_search = random_search.fit(X_train, y_train)
 
 print(random_search.best_params_)
@@ -119,21 +119,30 @@ with open('best_random_search_params.json', 'w') as fp:
 
 Next, you could do a GridSearch based on the results of the RandomizedSearch. You could even do a GridSearch directly without doing a RandomizedSearch if the search space is not too large. If needed, save the results to a JSON for later reference.
 ```python
-# Modify GridSearch param values based on the results of the random search 
+# GridSearch to search for best hyper parameter values
 
 from sklearn.model_selection import GridSearchCV
+from sklearn.ensemble import RandomForestClassifier
 
-param_grid = {
-    'n_estimators': [100, 200, 300, 1000],
-    'max_features': [2, 3],
-    'max_depth': [80, 90, 100, 110],
-    'min_samples_split': [8, 10, 12],
-    'min_samples_leaf': [3, 4, 5],
-    'bootstrap': [True]
-}
+explanation = '''
+n_estimators = number of trees in random forest
+max_features = number of features to consider at every split
+max_depth = maximum number of levels in tree
+min_samples_split = minimum number of samples required to split a node
+min_samples_leaf = minimum number of samples required at each leaf node
+bootstrap = method of selecting samples for training each tree
+'''
+
+# Create the parameter grid to search through
+param_grid = {'n_estimators': [1000, 2000, 2500], 
+               'max_features': ['sqrt'], 
+               'max_depth': [100, 120],  
+               'min_samples_split': [10, 11, 12],
+               'min_samples_leaf': [4, 6, 8],
+               'bootstrap': [True]}
 
 clf = RandomForestClassifier()
-grid_search = GridSearchCV(estimator=clf, param_grid=param_grid, cv=5, n_jobs=-1, scoring=None)
+grid_search = GridSearchCV(estimator=clf, param_grid=param_grid, cv=4, n_jobs=-1, scoring=None, verbose=2)
 grid_search = grid_search.fit(X_train, y_train)
 print(grid_search.best_params_)
 
