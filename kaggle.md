@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 import json
 
-# Change settings so variable value is printed even if its not on the last line of the cell
+# Useful hack so variable value is printed even if its not on the last line of the cell
 from IPython.core.interactiveshell import InteractiveShell
 InteractiveShell.ast_node_interactivity = "all"
 ```
@@ -118,7 +118,7 @@ with open('best_random_search_params.json', 'w') as fp:
 ```
 
 
-Next, you could do a GridSearch based on the results of the RandomizedSearch. If needed, save the results to a JSON for later reference.
+Next, you could do a GridSearch based on the results of the RandomizedSearch. You could even do a GridSearch directly without doing a RandomizedSearch if the search space is not too large. If needed, save the results to a JSON for later reference.
 ```python
 # Modify GridSearch param values based on the results of the random search 
 
