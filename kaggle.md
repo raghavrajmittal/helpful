@@ -6,12 +6,19 @@
 ## Set up
 The default Notebook on Kaggle includes a Python 3 environment that comes with many helpful analytics libraries already installed (including Numpy, Pandas, Scikit-arn etc) and is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python.
 
+Usually ```df.head()``` or any such value printing only works if its on the last line of the cell, but one can change that to happen for all cases by changing the  interactivity settings!
+
 ```python
-# import libraries needed
-import numpy as np 
+# import useful libraries
+import numpy as np
 import pandas as pd
 import json
+
+# Change settings so variable value is printed even if its not on the last line of the cell
+from IPython.core.interactiveshell import InteractiveShell
+InteractiveShell.ast_node_interactivity = "all"
 ```
+
 
 The directory structure is:
 ```bash
@@ -40,12 +47,8 @@ for dirname, _, filenames in os.walk('/kaggle/input'):
 
 &nbsp;
 ## Load and view data
-Usually ```df.head()``` or any such value printing only works if its on the last line of the cell, but one can change that to happen for all cases by changing the  interactivity settings! ```df.describe()``` generates escriptive statistics about the data.
-
+Load in the input files, and take a peek at them using ```df.head()```. To generate descriptive statistics about the data, run  ```df.describe()```.
 ```python
-from IPython.core.interactiveshell import InteractiveShell
-InteractiveShell.ast_node_interactivity = "all"
-
 # load data
 train_data = pd.read_csv("/kaggle/input/titanic/train.csv")
 train_data.head()
@@ -57,6 +60,8 @@ test_data.head()
 train_data.describe()
 test_data.describe()
 ```
+
+
 Pre-process the data as needed, and split into training and validation sets:
 ```python
 from sklearn.model_selection import train_test_split
@@ -69,15 +74,14 @@ X_final_test = pd.get_dummies(test_data[features])
 y = train_data["Survived"]
 
 # Split into validation and training sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 ```
 
 
 
 &nbsp;
 ## Random Forest
-
-Do a RandomizedSearch first to see what might be a good hyper parameters to further search around. This doesn't run all possible combinations, but instead runs ```n_iters``` different random combinations from the param grid specified.
+Do a RandomizedSearch first to see what might be a good hyper parameters to further search around. This doesn't run all possible combinations, but instead runs ```n_iters``` different random combinations from the param grid specified. If needed, save the results to a JSON for later reference.
 ```python
 # Random Search for estimate of the best model parameters
 from sklearn.ensemble import RandomForestClassifier
@@ -113,28 +117,31 @@ with open('best_random_search_params.json', 'w') as fp:
     json.dump(random_search.best_params_, fp)
 ```
 
-Next, you could do a GridSearch based on the results of the RandomizedSearch:
+
+Next, you could do a GridSearch based on the results of the RandomizedSearch. If needed, save the results to a JSON for later reference.
 ```python
 # Modify GridSearch param values based on the results of the random search 
 
 from sklearn.model_selection import GridSearchCV
 
 param_grid = {
-    'bootstrap': [True],
-    'max_depth': [80, 90, 100, 110],
+    'n_estimators': [100, 200, 300, 1000],
     'max_features': [2, 3],
-    'min_samples_leaf': [3, 4, 5],
+    'max_depth': [80, 90, 100, 110],
     'min_samples_split': [8, 10, 12],
-    'n_estimators': [100, 200, 300, 1000]
+    'min_samples_leaf': [3, 4, 5],
+    'bootstrap': [True]
 }
 
 clf = RandomForestClassifier()
 grid_search = GridSearchCV(estimator=clf, param_grid=param_grid, cv=5, n_jobs=-1, scoring=None)
 grid_search = grid_search.fit(X_train, y_train)
 print(grid_search.best_params_)
+
 with open('best_grid_search_params.json', 'w') as fp:
     json.dump(grid_search.best_params_, fp)
 ```
+
 
 Evaluate how the model is performing for unseen data (test data and test labels). Modify error metric as needed. 
 ```python
@@ -160,7 +167,8 @@ random_accuracy = evaluate(best_random_search_model, X_test, y_test)
 best_grid_search_model = grid_search.best_estimator_
 grid_accuracy = evaluate(best_grid_search_model, X_test, y_test)
 ```
-    
+
+
 Make final predictions using the best model. The CSV is saved as output when the 'Save & Run All' option is selected on Kaggle.
 ```python
 # make final predictions on test data
