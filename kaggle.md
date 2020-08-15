@@ -4,7 +4,7 @@
 
 &nbsp;
 ## Set up
-The default Python 3 environment comes with many helpful analytics libraries installed (including Numpy, Pandas, Scikit-arn etc) and is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python.
+The default Notebook on Kaggle includes a Python 3 environment that comes with many helpful analytics libraries already installed (including Numpy, Pandas, Scikit-arn etc) and is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python.
 
 ```python
 # import libraries needed
