@@ -1,6 +1,6 @@
 # Helpful
-List of helpful commands for tech in general!
+Helpful tips, commands, and code.
 
-
+[data-science.md](https://github.com/raghavrajmittal/helpful/blob/master/data-science.md) - A Data Science Framework
 [heroku.md](https://github.com/raghavrajmittal/helpful/blob/master/heroku.md) - Deploying Web Apps to Heroku  
-[kaggle.md](https://github.com/raghavrajmittal/helpful/blob/master/kaggle.md) - Set up a python notebook on Kaggle  
+[random-forest.md](https://github.com/raghavrajmittal/helpful/blob/master/random-forest.md) - Implement a Random Forest
