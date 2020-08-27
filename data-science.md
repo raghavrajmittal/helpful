@@ -1,11 +1,16 @@
 # Data Science Framework
 
-Summarizes information from [this](https://www.kaggle.com/ldfreeman3/a-data-science-framework-to-achieve-99-accuracy) and [this](https://www.kaggle.com/alexisbcook/getting-started-with-titanic). It was originally written for approaching the Titanic competition on Kaggle, but should be applicable elsewhere too.
+It was originally written for approaching the Titanic competition on Kaggle, but should be applicable elsewhere too.
+
+Ideas, process, and code is heavily influenced by some amazing kaggle notebooks, including but not limited to [this](https://www.kaggle.com/ldfreeman3/a-data-science-framework-to-achieve-99-accuracy), [this](https://www.kaggle.com/shreyasvedpathak/titanic-survival-prediction-top-4#Defining-Models), and [this](https://www.kaggle.com/gunesevitan/titanic-advanced-feature-engineering-tutorial#2.-Feature-Engineering).
+
 
 
 ## Step 1: Define the Problem
-"Problems before requirements, requirements before solutions, solutions before design, and design before technology"
+> If you define the problem correctly, you almost have the solution.
+> \- Steve Jobs
 
+Hmm not entirely true, but regardless, you get the idea.
 
 
 
@@ -32,10 +37,14 @@ import json
 
 from pprint import pprint
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 # Useful hack so variable value is printed even if its not on the last line of the cell
 from IPython.core.interactiveshell import InteractiveShell
 InteractiveShell.ast_node_interactivity = "all"
 ```
+
 
 The directory structure on Kaggle is:
 ```
@@ -60,11 +69,6 @@ for dirname, _, filenames in os.walk('../input'):
         print(os.path.join(dirname, filename))
 ```
 
-
-#### 3.2 Meet and Greet Data
-This is the meet and greet step. Get to know your data by first name and learn a little bit about it. What does it look like (datatype and values), what makes it tick (independent/ feature variables), and its goals in life (dependent/target variables). Think of it like a first date, before you jump in and start poking it in the bedroom.
-
-
 Load in the input files, take a peek at them using ```df.head()```, generate descriptive statistics about the data using ```df.describe()```, and get an idea about the variable datatypes using ```df.info()```.
 ```python
 # load data
@@ -83,61 +87,183 @@ train_data.info()
 test_data.info()
 ```
 
-
-#### 3.3 Data cleaning
-In this stage, we will clean our data by 1) correcting aberrant values and outliers, 2) completing missing information, 3) creating new features for analysis, and 4) converting fields to the correct format for calculations and presentation, 5) Setting up X and y.
+Set up some basic functions to join/separate the testing and training sets. They are usually very handy.
 
 ```python
-from sklearn.preprocessing import LabelEncoder
+# Returns a concatenated df of training and test set
+def concat_df(train_data, test_data):
+    return pd.concat([train_data, test_data], sort=True).reset_index(drop=True)
 
-def prepare_data(dataset, train_data):
-    # train_data is needed to have access to mode, median etc when replacing null values
-
-    data = dataset.copy(deep = True)
-
-    #complete missing data
-    data['Age'].fillna(train_data['Age'].median(), inplace = True)
-    data['Embarked'].fillna(train_data['Embarked'].mode()[0], inplace = True)
-    data['Fare'].fillna(train_data['Fare'].median(), inplace = True)
-
-
-    # Feature Engineering
-    data['FamilySize'] = data['SibSp'] + data['Parch'] + 1
-    data['IsAlone'] = 0
-    data.loc[data['FamilySize'] > 1, 'IsAlone'] = 1
-
-    data['Title'] = data['Name'].str.split(", ", expand=True)[1].str.split(".", expand=True)[0]
-    title_names = (data['Title'].value_counts() < 10)
-    data['Title'] = data['Title'].apply(lambda x: 'Misc' if title_names.loc[x] == True else x)
-
-
-    # Continuous variable bins; qcut and cut
-    data['FareBin'] = pd.qcut(data['Fare'], 4)
-    data['AgeBin'] = pd.cut(data['Age'].astype(int), 5)
-
-
-    # encode labels
-    label = LabelEncoder()
-    data['AgeBin_Code'] = label.fit_transform(data['AgeBin'])
-    data['FareBin_Code'] = label.fit_transform(data['FareBin'])
-
-
-    # feature selection
-    original_features = ["AgeBin_Code", "FareBin_Code",  "FamilySize", "IsAlone", "Pclass", 'SibSp', 'Parch']
-    categorical_features = ["Sex", 'Embarked', 'Title']
-    data = data[original_features + categorical_features]
-    data = pd.get_dummies(data, columns=categorical_features, drop_first = False)
-
-    return data
-
-
-X = prepare_data(train_data, train_data)
-y = train_data["Survived"]
-X_final_test = prepare_data(test_data, train_data)
-
-X.head()
-X_final_test.head()
+# Returns divided dfs of training and test set
+def divide_df(all_data):
+    return all_data.loc[:890], all_data.loc[891:].drop(['Survived'], axis=1)
 ```
+
+#### 3.2 Meet and Greet Data
+> This is the meet and greet step. Get to know your data by first name and learn a little bit about it. What does it look like (datatype and values), what makes it tick (independent/ feature variables), and its goals in life (dependent/target variables). Think of it like a first date, before you jump in and start poking it in the bedroom.
+> \- ldfreeman3
+
+
+To plot the relationship between a numerical and one or more categorical variables, use ```seaborn.catplot```:
+```python
+sns.catplot(x="SibSp", col = 'Survived', data=train_data, kind = 'count', palette='pastel')
+plt.show()
+```
+
+To plot any conditional relationships:
+```python
+g = sns.FacetGrid(train_data, col='Survived')
+g = g.map(sns.distplot, "Age")
+```
+
+To flexibly plot a univariate distribution of observations, use ```seaborn.distplot```:
+```python
+f, axes = plt.subplots(2, 1, figsize = (10, 6))
+
+g1 = sns.distplot(train_data["Fare"], color="red", label="Skewness : %.2f"%(train_data["Fare"].skew()), ax=axes[0])
+axes[0].title.set_text('Fare')
+axes[0].legend()
+
+g2 = sns.distplot(train_data["Age"], color="blue", label="Skewness : %.2f"%(log_fare.skew()), ax=axes[1])
+axes[1].title.set_text('Age')
+axes[1].legend()
+
+plt.tight_layout()
+```
+
+
+To get a list of the highest correlating attributes:
+```python
+# get correlations between features
+df_train_corr = train_data.drop(['PassengerId'], axis=1).corr().abs().unstack().sort_values(kind="quicksort", ascending=False).reset_index()
+df_train_corr.rename(columns={"level_0": "Feature 1", "level_1": "Feature 2", 0: 'Correlation Coefficient'}, inplace=True)
+df_train_corr.drop(df_train_corr.iloc[1::2].index, inplace=True)
+df_train_corr_nd = df_train_corr.drop(df_train_corr[df_train_corr['Correlation Coefficient'] == 1.0].index)
+
+df_test_corr = test_data.corr().abs().unstack().sort_values(kind="quicksort", ascending=False).reset_index()
+df_test_corr.rename(columns={"level_0": "Feature 1", "level_1": "Feature 2", 0: 'Correlation Coefficient'}, inplace=True)
+df_test_corr.drop(df_test_corr.iloc[1::2].index, inplace=True)
+df_test_corr_nd = df_test_corr.drop(df_test_corr[df_test_corr['Correlation Coefficient'] == 1.0].index)
+
+# Show high correlations
+high_train_corr = df_train_corr_nd['Correlation Coefficient'] > 0.1
+high_test_corr = df_test_corr_nd['Correlation Coefficient'] > 0.1
+
+df_train_corr_nd[high_train_corr]
+df_test_corr_nd[high_test_corr]
+```
+
+
+To plot the heatmap of correlations between the attributes:
+```python
+# see correlation heatmap
+fig, axs = plt.subplots(nrows=2, figsize=(20, 20))
+
+sns.heatmap(train_data.drop(['PassengerId'], axis=1).corr(), ax=axs[0], annot=True, square=True, cmap='coolwarm', annot_kws={'size': 14})
+sns.heatmap(test_data.drop(['PassengerId'], axis=1).corr(), ax=axs[1], annot=True, square=True, cmap='coolwarm', annot_kws={'size': 14})
+
+for i in range(2):    
+    axs[i].tick_params(axis='x', labelsize=14)
+    axs[i].tick_params(axis='y', labelsize=14)
+
+axs[0].set_title('Training Set Correlations', size=15)
+axs[1].set_title('Test Set Correlations', size=15)
+
+plt.show()
+```
+
+
+
+
+#### 3.3 Data cleaning
+To display the number of missing values for each column:
+```Python
+# show number of missing values for each column
+def display_missing(df):
+    print('\n')
+    for col in df.columns.tolist():         
+        num_missing = df[col].isnull().sum()
+        if num_missing > 0:
+            print('{} column missing values: {}'.format(col, num_missing))
+
+display_missing(train_data)
+display_missing(test_data)
+```
+
+Next, complete the missing data:
+```python
+all_data = concat_df(train_data, test_data)
+
+# complete missing data
+all_data['Age'] = all_data.groupby(['Sex', 'Pclass'])['Age'].apply(lambda x: x.fillna(x.median()))
+all_data['Embarked'].fillna(train_data['Embarked'].mode()[0], inplace = True)
+all_data['Fare'].fillna(train_data['Fare'].median(), inplace = True)
+
+train_data, test_data = divide_df(all_data)
+```
+
+#### 3.4 Feature Engineering
+Next, do some feature engineering to create new features or modify existing ones:
+```Python
+all_data = concat_df(train_data, test_data)
+
+#feature_engineering
+all_data['FamilySize'] = all_data['SibSp'] + all_data['Parch'] + 1
+all_data['IsAlone'] = 0
+all_data.loc[all_data['FamilySize'] > 1, 'IsAlone'] = 1
+
+all_data["FareLog"] = all_data["Fare"].map(lambda i: np.log(i) if i > 0 else 0)
+all_data['FareLogBin'] = pd.qcut(all_data['FareLog'], 13)
+all_data['FareBin'] = pd.qcut(all_data['Fare'], 13)
+
+all_data['AgeBin'] = pd.cut(all_data['Age'].astype(int), 10)
+
+all_data['Title'] = all_data['Name'].str.split(", ", expand=True)[1].str.split(".", expand=True)[0]
+title_names = (all_data['Title'].value_counts() < 10)
+all_data['Title'] = all_data['Title'].apply(lambda x: 'Misc' if title_names.loc[x] == True else x)
+
+train_data, test_data = divide_df(all_data)
+```
+
+#### 3.4 Feature Selection
+Next, convert all features to numerical features (create dummies for categorical features), scale the training and testing sets based on the training set, and set up X and y:
+```Python
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import StandardScaler
+
+
+# encode labels
+non_numeric_features = ['AgeBin', 'FareBin', 'FareLogBin']
+all_data = concat_df(train_data, test_data)
+for feature in non_numeric_features:
+    all_data[feature] = LabelEncoder().fit_transform(all_data[feature])
+train_data, test_data = divide_df(all_data)
+
+
+# feature selection
+numerical_features = ["AgeBin", "FareBin", "IsAlone", "FamilySize", "Pclass"]
+categorical_features = ["Sex", 'Embarked', 'Title']
+
+X = train_data[numerical_features + categorical_features]
+X = pd.get_dummies(X, columns=categorical_features, drop_first=True)
+
+X_final_test = test_data[numerical_features + categorical_features]
+X_final_test = pd.get_dummies(X_final_test, columns=categorical_features, drop_first=True)
+
+y = train_data["Survived"]
+
+
+# #Scaling
+scaler = StandardScaler().fit(X)
+X = scaler.transform(X)
+X_final_test = scaler.transform(X_final_test)
+
+print('X_train shape: {}'.format(X.shape))
+print('y_train shape: {}'.format(y.shape))
+print('X_test shape: {}'.format(X_final_test.shape))
+```
+
+
 
 
 #### 3.4 Split training and testing data
@@ -156,12 +282,11 @@ cv_split = model_selection.ShuffleSplit(n_splits = 10, test_size = .3, train_siz
 ```
 
 
-## Step 4: Exploratory Analysis
+
+## Step 4: Model Data
+
 Deploy descriptive and graphical statistics to look for potential problems, patterns, classifications, correlations and comparisons in the dataset.
 
-
-
-## Step 5: Model Data
 Based on the data, machine learning can be categorized as: supervised learning, unsupervised learning, and reinforced learning. Based on the depending on your target variable and data modeling goals, machine learning algorithms can be reduced to four categories: classification, regression, clustering, or dimensionality reduction.
 
 Supervised Learning Classification Algorithms include:
@@ -179,13 +304,13 @@ Process would be: determine a baseline accuracy (eg. random coin toss, or maybe 
 PS: Keep optimizing and strategizing: iterate back through the process to make it better, faster, stronger than before!
 
 
-Don't forget to train the final model on all the data!
+Don't forget to train the final model on all the data if required!
 ```python
-# train best model on all data and make final predictions to submit
-best_model = best_grid_search_model
+# train best model on all the data and make final predictions on test data
+best_model = grid_search.best_estimator_
 best_model = best_model.fit(X, y)
 
-predictions = best_model.predict(X_final_test)
+predictions = best_model.predict(X_final_test).astype(int)
 output = pd.DataFrame({'PassengerId': test_data.PassengerId, 'Survived': predictions})
 output.to_csv('my_submission.csv', index=False)
 ```
