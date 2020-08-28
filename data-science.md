@@ -73,9 +73,10 @@ Load in the input files, take a peek at them using ```df.head()```, generate des
 ```python
 # load data
 train_data = pd.read_csv("input/train.csv")
-train_data.head()
-
 test_data = pd.read_csv("input/test.csv")
+
+# Take a peek at the data
+train_data.head()
 test_data.head()
 
 # view statistics of data
