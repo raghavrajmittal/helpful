@@ -6,5 +6,6 @@ Helpful tips, commands, and code.
 |------------------------------------------------------------------------------------------|-----------------------------------------------|
 | [data-science](https://github.com/raghavrajmittal/helpful/blob/master/data-science.md)   | A Data Science Framework                      |
 | [heroku](https://github.com/raghavrajmittal/helpful/blob/master/heroku.md)               | Deploying Web Apps to Heroku                  |
+| [git](https://github.com/raghavrajmittal/helpful/blob/master/git.md)                     | Git commands                                  |
 | [random-forest](https://github.com/raghavrajmittal/helpful/blob/master/random-forest.md) | Implement a Random Forest in Python           |
 | [reactJS](https://github.com/raghavrajmittal/helpful/blob/master/reactJS.md)             | Create a React app and deploy to Github Pages |
