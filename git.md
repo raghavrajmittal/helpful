@@ -50,3 +50,10 @@ The --set-upstream option sets up an upstream branch, so that a subsequent git p
 git push --set-upstream <remote-name> <local-branch-name>
 ```
 
+## Syncing Forks (Eg. origin/master with remote/master)
+Use this [Fork-Branch-Git workflow](https://blog.scottlowe.org/2015/01/27/using-fork-branch-git-workflow/)!
+```
+git remote add upstream https://github.com/udacity/deep-learning-v2-pytorch.git
+git pull upstream master
+git push origin master
+```
