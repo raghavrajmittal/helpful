@@ -50,30 +50,26 @@ git push --set-upstream <remote-name> <local-branch-name>
 
 ## Checking out a branch from a different remote
 #### With One Remote
-With Git versions ≥ 1.6.6, with only one remote, you can do:
+With Git versions ≥ 1.6.6, with only one remote, you can fetch and checkout. (Note: ```git checkout test``` will NOT work in modern git if you have multiple remotes
 ```
 git fetch
-git checkout test
+git checkout <branch_name>
 ```
-```git checkout test``` will NOT work in modern git if you have multiple remotes.
 
 #### With >1 Remotes
-Before you can start working locally on a remote branch, you need to fetch a branch.
+Before you can start working locally on a remote branch, you need to fetch a branch. Fetch all of the remote branches, and then see the branches available for checkout with:
 ```
 git fetch origin
-```
-This will fetch all of the remote branches for you. You can see the branches available for checkout with:
-```
 git branch -v -a
 ```
 
 With the remote branches in hand, you now need to check out the branch you are interested in, giving you a local working copy:
 ```
-git checkout -b <branch_name> <name of remote>/<branch_name>
+git checkout -b <branch_name> <remote_name>/<branch_name>
 ```
 or the shorthand:
 ```
-git checkout -t <name of remote>/<branch_name>
+git checkout -t <remote_name>/<branch_name>
 ```
 
 
