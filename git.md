@@ -23,6 +23,9 @@ git status
 git remote -v
 git branch
 git log
+git log --decorate --oneline --graph
+git log --follow -p -- path/to/file # To look at the history of a file
+git cat-files -p <start of any hash of object>` # Provide content or type and size information for repository objects (can't use `cat` directly since content has been compreseed)
 ```
 
 
@@ -71,6 +74,7 @@ git checkout -t <remote_name>/<branch_name>
 ```
 
 
+
 ## Syncing Forks (Eg. origin/master with remote/master)
 Use this [Fork-Branch-Git workflow](https://blog.scottlowe.org/2015/01/27/using-fork-branch-git-workflow/)!
 ```
@@ -79,3 +83,12 @@ git pull upstream master
 git push origin master
 ```
 
+
+
+## Other useful stuff
+#### Creating aliases
+Create an alias in git and call it as follows:
+```
+git config --global alias.logdog 'log --decorate --oneline --graph
+git logdog
+```
