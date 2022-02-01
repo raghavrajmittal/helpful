@@ -2,7 +2,13 @@
 
 ## Basic Stuff
 
-Configure name, email:
+Configure local name, email:
+```
+git config user.email johndoe@users.noreply.github.com
+git config user.name "John Doe"
+```
+
+Configure global name, email:
 ```
 git config --global user.name "Raghav Mittal"
 git config --global user.email raghav@some-domain.com
