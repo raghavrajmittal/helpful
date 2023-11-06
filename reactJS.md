@@ -15,6 +15,12 @@ Check whether Node and npm are installed:
 node -v && npm -v
 ```
 
+To upgrade to latest versions:
+```
+nvm install node
+npm install -g npm@latest
+``` 
+
 
 ## Launch your first project using create-react-app
 Create a new app (might take a few minutes):
