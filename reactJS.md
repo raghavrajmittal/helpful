@@ -36,7 +36,8 @@ npm start
 
 A basic React app should be visible at ```localhost:3000```.  
 
-
+(Note that `npm start` only creates a local dev version of the application. To create a build for production, use 
+`npm run build`)
 
 ## Running previously written React code
 If you want to run an existing app already, first install the libraries needed, and then start the app:
@@ -59,15 +60,18 @@ package.json
 README.md
 ```
 
-* ```package.json```: This file contains metadata about the project, and the list of dependencies being used in the project.  
 * ```public/index.html```: When the application starts this is the first page that is loaded. This will be the only html file in the entire application since React is generally written using JSX. This file has a line of code ```<div id=”root”></div>```, which is important because all the application components are loaded into this div.  
-* ```src/index.js```: This is the javascript file corresponding to index.html. This file has the line of code ```ReactDOM.render(<App />,document.getElementById(‘root’));``` - which is also super important.
+* ```src/index.js```: This is the javascript file corresponding to index.html. This file has the line of code ```ReactDOM.render(<App />,document.getElementById(‘root’));``` - which basically puts the React app inside this `root` div.
+
 * ```src/App.js```: This is the file for App Component. App Component is the main component in React which acts as a container for all other components.
 * ```src/*.css```: CSS files corresponding to the js files.
-* ```build/```: This is the folder where the built files are stored. React Apps can be developed using either JSX, or normal JavaScript itself, but using JSX definitely makes things easier to code for the developer :). But browsers do not understand JSX. So JSX needs to be converted into javascript before deploying. These converted files are stored in the build folder after bundling and minification. In order to see the build folder Run the following command
+
+* ```package.json```: This file contains metadata about the project, and the list of dependencies being used in the project.  
 * ```node_modules/```: Any external libraries used in the project are stored here.
+* ```build/```: This is the folder where the built files are stored. React Apps can be developed using either JSX, or normal JavaScript itself, but using JSX definitely makes things easier to code for the developer :). But browsers do not understand JSX. So JSX needs to be converted into javascript before deploying. These converted files are stored in the build folder after bundling and minification. In order to see the build folder Run the following command
 
 
+## Production Build
 
 ## Deploying on github pages
 Install the github pages package as a dev-dependecy. ```--save-dev``` automatically adds it to your package.json.
